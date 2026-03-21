@@ -69,7 +69,7 @@
 //! ```
 //!
 
-#[cfg(not(any(feature = "xiao-esp32c3")))]
+#[cfg(not(any(feature = "xiao-esp32c3", feature = "xiao-esp32c6")))]
 compile_error!("At least one Xiao device feature must be enabled");
 
 use core::fmt;
@@ -94,6 +94,8 @@ pub mod boards;
 pub use crate::components::io_expander::SevenSegDigit;
 #[cfg(feature = "xiao-esp32c3")]
 pub use boards::xiao_esp32c3::uferris_init;
+#[cfg(feature = "xiao-esp32c6")]
+pub use boards::xiao_esp32c6::uferris_init;
 
 // ------------------------------------------
 // Feature-Gated Trait Alias
