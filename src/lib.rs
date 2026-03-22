@@ -96,6 +96,8 @@ pub use crate::components::io_expander::SevenSegDigit;
 pub use boards::xiao_esp32c3::uferris_init;
 #[cfg(feature = "xiao-esp32c6")]
 pub use boards::xiao_esp32c6::uferris_init;
+#[cfg(feature = "xiao-esp32s3")]
+pub use boards::xiao_esp32s3::uferris_init;
 
 // ------------------------------------------
 // Feature-Gated Trait Alias
