@@ -6,7 +6,7 @@ rustflags = [
     "force-frame-pointers",
 ]
 
-target = "riscv32imc-unknown-none-elf"
+#target = "riscv32imc-unknown-none-elf"
 
 [unstable]
 build-std = ["alloc", "core"]
