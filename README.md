@@ -114,6 +114,24 @@ fn main() -> ! {
 ```
 
 
+## Running Examples
+
+Examples live in the `examples/` directory, grouped by Xiao board. Each board directory is a self-contained Cargo project with its own target, toolchain, and runner configuration, so you build and run from inside it:
+
+```bash
+cd examples/<board>
+cargo run --bin <example>
+```
+
+For example, to run `blinky.rs` on a Xiao ESP32-C3:
+
+```bash
+cd examples/xiao-esp32c3
+cargo run --bin blinky
+```
+
+Use `cargo build --bin <example>` if you only want to compile without flashing.
+
 ## License
 
 Licensed under Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
