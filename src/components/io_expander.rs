@@ -240,9 +240,6 @@ impl<I2C: I2c> IoExpander<I2C> {
     }
 
     pub fn seven_segment_display_colon_en(&mut self, enable: bool) -> Result<(), I2C::Error> {
-        // 0. reset Port 2 to None
-        self.write_register(OUT_PORT2, 0x00).unwrap();
-
         // 1. Activate Digits 2 & 4 (Port 1)
         let digits = IoExpPort1::Digit2.or(IoExpPort1::Digit4).bits();
         let mut port1 = self.read_register(OUT_PORT1)?;

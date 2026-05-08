@@ -17,7 +17,7 @@ autobins = false
 [features]
 #! ⚠️ At least one Xiao device feature must be enabled when building the crate.
 
-default = ["power-board"]
+default = []
 ## Xiao ESP32-C3 Device Support
 xiao-esp32c3 = [
     "esp-hal/esp32c3",
