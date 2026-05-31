@@ -32,9 +32,11 @@
 //!
 //! ## Currently Supported Xiaos:
 //! - Xiao ESP32-C3
+//! - Xiao ESP32-C6
+//! - Xiao ESP32-S3
 //!
 //! ## `async` Support
-//! This crate does not support `async` yet. Support would entail adding board `async` method calls for the different functions in `lib.rs`.
+//! Although there is an embassy feature, This crate does not support `async` yet. Support would entail adding board `async` method calls for the different functions in `lib.rs`.
 //!
 //! ## Contributing to the uFerris BSP - Adding a New Xiao Board Support:
 //! Adding support for a new Xiao board entails two parts:
@@ -69,7 +71,11 @@
 //! ```
 //!
 
-#[cfg(not(any(feature = "xiao-esp32c3", feature = "xiao-esp32c6", feature = "xiao-esp32s3")))]
+#[cfg(not(any(
+    feature = "xiao-esp32c3",
+    feature = "xiao-esp32c6",
+    feature = "xiao-esp32s3"
+)))]
 compile_error!("At least one Xiao device feature must be enabled");
 
 use core::fmt;
