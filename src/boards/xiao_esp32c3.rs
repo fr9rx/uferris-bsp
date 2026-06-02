@@ -121,7 +121,7 @@ pub fn uferris_init(peripherals: Peripherals) -> UferrisEsp32 {
         peripherals.I2C0,
         esp_hal::i2c::master::Config::default().with_frequency(Rate::from_khz(100)),
     )
-    .unwrap()
+    .unwrap_or_else(|e| panic!("I2C bus init failed: {:?}", e))
     .with_scl(peripherals.GPIO7)
     .with_sda(peripherals.GPIO6);
 
@@ -156,7 +156,7 @@ pub fn uferris_init(peripherals: Peripherals) -> UferrisEsp32 {
             clock_source: timer::LSClockSource::APBClk,
             frequency: Rate::from_hz(2700u32),
         })
-        .unwrap();
+        .unwrap_or_else(|e| panic!("Buzzer timer config failed: {:?}", e));
 
     // Promote Timer to Static (Channel borrows this)
     let buzzer_timer_ref = BUZZER_TIMER.init(buzzer_timer);
@@ -170,7 +170,7 @@ pub fn uferris_init(peripherals: Peripherals) -> UferrisEsp32 {
             duty_pct: 0,
             drive_mode: esp_hal::gpio::DriveMode::PushPull,
         })
-        .unwrap();
+        .unwrap_or_else(|e| panic!("Buzzer channel config failed: {:?}", e));
 
     // --------------------------------------
     //            SPI / SD Setup
@@ -181,7 +181,7 @@ pub fn uferris_init(peripherals: Peripherals) -> UferrisEsp32 {
             peripherals.SPI2,
             esp_hal::spi::master::Config::default().with_frequency(Rate::from_khz(400)),
         )
-        .unwrap()
+        .unwrap_or_else(|e| panic!("SPI bus init failed: {:?}", e))
         .with_sck(peripherals.GPIO8)
         .with_miso(peripherals.GPIO9)
         .with_mosi(peripherals.GPIO10);
@@ -197,7 +197,8 @@ pub fn uferris_init(peripherals: Peripherals) -> UferrisEsp32 {
 
         // Create SPI Device (Borrows from SPI_BUS static)
         // We do NOT need to make this device static. SdCard owns it.
-        let sd_device = SpiRefCellDevice::new(spi_bus_ref, sd_cs, delay).unwrap();
+        let sd_device = SpiRefCellDevice::new(spi_bus_ref, sd_cs, delay)
+            .unwrap_or_else(|e| panic!("SPI SD card device init failed: {:?}", e));
 
         // Create SD Card (Owns sd_device)
         let sd_card = embedded_sdmmc::SdCard::new(sd_device, delay);
@@ -224,5 +225,5 @@ pub fn uferris_init(peripherals: Peripherals) -> UferrisEsp32 {
         #[cfg(feature = "power-board")]
         ina_i2c,
     )
-    .unwrap()
+    .unwrap_or_else(|e| panic!("uFerris init failed: {}", e))
 }
