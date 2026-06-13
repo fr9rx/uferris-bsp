@@ -129,11 +129,21 @@ impl<T> PowerConstraints for T {}
 const INA219_ADDR: u8 = 0x45;
 
 #[derive(Debug, Clone)]
-pub struct InitError;
+pub enum InitError {
+    IoExpander,
+    Rtc,
+    PowerMonitor,
+    SdCard,
+}
 
 impl fmt::Display for InitError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "uFerris initialization error")
+        match self {
+            InitError::IoExpander => write!(f, "I/O expander init failed (I2C)"),
+            InitError::Rtc => write!(f, "RTC init failed (I2C)"),
+            InitError::PowerMonitor => write!(f, "INA219 power monitor init failed (I2C)"),
+            InitError::SdCard => write!(f, "SD card init failed (SPI)"),
+        }
     }
 }
 
@@ -190,7 +200,7 @@ where
         let mut expander = components::io_expander::IoExpander::new(expander_i2c);
         let rtc = components::rtc::Rtc::new(rtc_i2c);
 
-        expander.init().map_err(|_| InitError)?;
+        expander.init().map_err(|_| InitError::IoExpander)?;
 
         let led1 = components::led::Led { pin: led1_pin };
         let sw_btn5 = components::button::Button { pin: sw_btn5_pin };
@@ -202,7 +212,7 @@ where
                 IntCalibration::new(ina219::calibration::MicroAmpere(1000), 100_000).unwrap();
 
             SyncIna219::new_calibrated(ina_i2c, Address::from_byte(INA219_ADDR).unwrap(), calib)
-                .map_err(|_| InitError)?
+                .map_err(|_| InitError::PowerMonitor)?
         };
 
         Ok(Self {
@@ -390,7 +400,7 @@ where
     /// Returns the size of the SD card in bytes if detected.
     #[cfg(feature = "power-board")]
     pub fn init_sd_card(&mut self) -> Result<u64, InitError> {
-        let mgr = self.vol_mgr.as_mut().ok_or(InitError)?;
+        let mgr = self.vol_mgr.as_mut().ok_or(InitError::SdCard)?;
 
         // Temporary variable to hold the size
         let mut size_bytes = 0u64;
@@ -403,7 +413,7 @@ where
         });
 
         if size_bytes == 0 {
-            return Err(InitError);
+            return Err(InitError::SdCard);
         }
 
         Ok(size_bytes)
@@ -435,17 +445,19 @@ where
     where
         F: FnMut(&[u8]),
     {
-        let mgr = self.vol_mgr.as_mut().ok_or(InitError)?;
+        let mgr = self.vol_mgr.as_mut().ok_or(InitError::SdCard)?;
 
-        let volume = mgr.open_volume(VolumeIdx(0)).map_err(|_| InitError)?;
-        let root_dir = volume.open_root_dir().map_err(|_| InitError)?;
+        let volume = mgr
+            .open_volume(VolumeIdx(0))
+            .map_err(|_| InitError::SdCard)?;
+        let root_dir = volume.open_root_dir().map_err(|_| InitError::SdCard)?;
         let file = root_dir
             .open_file_in_dir(name, Mode::ReadOnly)
-            .map_err(|_| InitError)?;
+            .map_err(|_| InitError::SdCard)?;
 
         let mut buffer = [0u8; 64];
         while !file.is_eof() {
-            let bytes_read = file.read(&mut buffer).map_err(|_| InitError)?;
+            let bytes_read = file.read(&mut buffer).map_err(|_| InitError::SdCard)?;
             if bytes_read > 0 {
                 f(&buffer[..bytes_read]);
             }
